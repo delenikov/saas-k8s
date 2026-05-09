@@ -4,17 +4,15 @@ import logging
 import time
 from dataclasses import dataclass
 
-import numpy as np
-from numpy.typing import NDArray
-
 logger = logging.getLogger(__name__)
+
+Matrix = list[list[float]]
 
 
 @dataclass(frozen=True, slots=True)
 class ComputeRequest:
     size: int
     iterations: int
-    complexity: int
 
 
 @dataclass(frozen=True, slots=True)
@@ -26,22 +24,13 @@ class ComputeResult:
 def run_cpu_workload(request: ComputeRequest) -> ComputeResult:
     start_time = time.perf_counter()
 
-    rng = np.random.default_rng()
-    matrix_a = rng.random((request.size, request.size), dtype=np.float64)
-    matrix_b = rng.random((request.size, request.size), dtype=np.float64)
+    matrix_a = _build_matrix(request.size, seed=1)
+    matrix_b = _build_matrix(request.size, seed=7)
 
     try:
-        checksum = _matrix_power_workload(
-            matrix_a=matrix_a,
-            matrix_b=matrix_b,
-            iterations=request.iterations,
-            complexity=request.complexity,
-        )
-    except FloatingPointError:
-        logger.exception("Floating point error while running CPU workload")
-        raise
-    except np.linalg.LinAlgError:
-        logger.exception("Linear algebra error while running CPU workload")
+        checksum = _matrix_multiplication_workload(matrix_a=matrix_a,matrix_b=matrix_b,iterations=request.iterations)
+    except MemoryError:
+        logger.exception("Memory error while running CPU workload")
         raise
 
     return ComputeResult(
@@ -50,37 +39,46 @@ def run_cpu_workload(request: ComputeRequest) -> ComputeResult:
     )
 
 
-def _matrix_power_workload(
-    matrix_a: NDArray[np.float64],
-    matrix_b: NDArray[np.float64],
+def _build_matrix(size: int, seed: int) -> Matrix:
+    matrix: Matrix = []
+
+    for row_index in range(size):
+        row: list[float] = []
+
+        for column_index in range(size):
+            value = ((row_index + seed) * (column_index + seed + 1)) % 97
+            row.append((value + 1) / 97.0)
+
+        matrix.append(row)
+
+    return matrix
+
+
+def _matrix_multiplication_workload(
+    matrix_a: Matrix,
+    matrix_b: Matrix,
     iterations: int,
-    complexity: int,
 ) -> float:
     result = matrix_a
     checksum = 0.0
+    size = len(matrix_a)
 
     for _ in range(iterations):
-        result = result @ matrix_b
+        next_result: Matrix = [[0.0] * size for _ in range(size)]
 
-        for _ in range(complexity):
-            result = np.sin(result) + np.cos(result)
+        for row_index in range(size):
+            result_row = result[row_index]
+            next_row = next_result[row_index]
 
-        normalized = _normalized_square(result)
-        checksum += float(np.linalg.det(normalized))
+            for column_index in range(size):
+                total = 0.0
 
-        if complexity >= 3:
-            eigenvalues = np.linalg.eigvals(normalized)
-            checksum += float(np.abs(eigenvalues).mean())
+                for inner_index in range(size):
+                    total += result_row[inner_index] * matrix_b[inner_index][column_index]
 
-        if complexity >= 6:
-            inverse = np.linalg.inv(normalized)
-            checksum += float(inverse.mean())
+                next_row[column_index] = total
+                checksum += total
 
-        result = np.divide(result, np.linalg.norm(result) + 1.0)
+        result = next_result
 
     return checksum
-
-
-def _normalized_square(matrix: NDArray[np.float64]) -> NDArray[np.float64]:
-    scale = np.linalg.norm(matrix) + 1.0
-    return np.divide(matrix, scale) + np.eye(matrix.shape[0], dtype=np.float64)

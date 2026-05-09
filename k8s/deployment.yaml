@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cpu-workload-api
+  labels:
+    app: cpu-workload-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cpu-workload-api
+  template:
+    metadata:
+      labels:
+        app: cpu-workload-api
+    spec:
+      containers:
+        - name: cpu-workload-api
+          image: <AWS_ACCOUNT_ID>.dkr.ecr.<REGION>.amazonaws.com/cpu-workload-api:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+          env:
+            - name: PYTHONDONTWRITEBYTECODE
+              value: "1"
+            - name: PYTHONUNBUFFERED
+              value: "1"
+            - name: OMP_NUM_THREADS
+              value: "1"
+            - name: OPENBLAS_NUM_THREADS
+              value: "1"
+            - name: MKL_NUM_THREADS
+              value: "1"
+            - name: NUMEXPR_NUM_THREADS
+              value: "1"
+          resources:
+            requests:
+              cpu: "500m"
+              memory: "1Gi"
+            limits:
+              cpu: "1000m"
+              memory: "2Gi"
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 20
+            periodSeconds: 10
