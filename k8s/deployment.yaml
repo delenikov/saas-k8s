@@ -1,22 +1,22 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: cpu-workload-api
+  name: saas-matrix
   labels:
-    app: cpu-workload-api
+    app: saas-matrix
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: cpu-workload-api
+      app: saas-matrix
   template:
     metadata:
       labels:
-        app: cpu-workload-api
+        app: saas-matrix
     spec:
       containers:
-        - name: cpu-workload-api
-          image: <AWS_ACCOUNT_ID>.dkr.ecr.<REGION>.amazonaws.com/cpu-workload-api:latest
+        - name: saas-matrix
+          image: 457090734537.dkr.ecr.eu-central-1.amazonaws.com/saas-matrix-project:latest
           imagePullPolicy: Always
           ports:
             - containerPort: 8080
@@ -36,10 +36,10 @@ spec:
           resources:
             requests:
               cpu: "500m"
-              memory: "1Gi"
+              memory: "500Mi"
             limits:
               cpu: "1000m"
-              memory: "2Gi"
+              memory: "1Gi"
           readinessProbe:
             httpGet:
               path: /health

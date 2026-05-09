@@ -36,8 +36,8 @@ uvicorn app.main:app --host 0.0.0.0 --port 8080
 ## Docker
 
 ```bash
-docker build -t cpu-workload-service:latest .
-docker run --rm -p 8080:8080 cpu-workload-service:latest
+docker build -t saas-matrix-project:latest .
+docker run --rm -p 8080:8080 saas-matrix-project:latest
 ```
 
 ## Example Requests
