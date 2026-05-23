@@ -48,7 +48,7 @@ curl -X POST "http://localhost:8080/compute?size=128"
 
 ## Load testing
 ```bash
-./scripts/run_tests.sh a81c30a73ecb14b55b4216b98eb754fe-1000624712.eu-central-1.elb.amazonaws.com eks
-./scripts/run_tests.sh 134.112.128.79:80 aks
+./scripts/run_tests.sh http://a81c30a73ecb14b55b4216b98eb754fe-1000624712.eu-central-1.elb.amazonaws.com eks
+./scripts/run_tests.sh http://134.112.128.79 aks
 python scripts/parse_results.py
 ```

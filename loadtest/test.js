@@ -18,12 +18,13 @@ export const options = {
 
 export default function () {
   const url = `${BASE_URL}/compute?size=${SIZE}`;
-
   const res = http.post(url);
 
   check(res, {
     'status is 200': (r) => r.status === 200,
   });
+
+  console.log("URL : " + url + "res" + res.body)
 
   sleep(1);
 }
