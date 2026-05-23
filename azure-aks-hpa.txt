@@ -1,0 +1,155 @@
+
+matrix size 10 vu 100 --> 2 pods  cpu: 7%/70% 
+matrix size 25 vu 100 -->  2 pods, deployment cpu: 14%/70%
+matrix size 50 vu 10  -->  2 pods, deployment cpu: 5%/70%
+matrix size 50 vu 25  --> 2 pods, deployment cpu: 10%/70%.
+matrix size 50 vu 50  --> 2 pods, deployment cpu: 23%/70% 
+matrix size 50 vu 100  --> 2 pods, deployment cpu: 65%/70%
+
+matrix size 100 vu 1  --> 2 pods, deployment cpu: 7%/70%
+matrix size 100 vu 5  --> 2 pods, deployment cpu: 7%/70%
+matrix size 100 vu 10  --> 2 pods, deployment cpu: 26%/70%
+
+matrix size 100 vu 25
+saas-matrix-hpa   Deployment/saas-matrix   cpu: 26%/70%   2         10        2          140m
+saas-matrix-hpa   Deployment/saas-matrix   cpu: 53%/70%   2         10        2          141m
+
+matrix size 100 vu 50 (Pocna da se kreira nov container, 3 repliki)
+saas-matrix-hpa   Deployment/saas-matrix   cpu: 105%/70%   2         10        2          142m
+saas-matrix-hpa   Deployment/saas-matrix   cpu: 105%/70%   2         10        3          142m
+
+matrix size 100 vu 100
+saas-matrix-hpa   Deployment/saas-matrix   cpu: 105%/70%   2         10        3          142m
+saas-matrix-hpa   Deployment/saas-matrix   cpu: 162%/70%   2         10        3          143m
+saas-matrix-hpa   Deployment/saas-matrix   cpu: 162%/70%   2         10        5          143m
+4th and 5th pod being created
+
+
+matrix size 250 vu 1
+saas-matrix-hpa   Deployment/saas-matrix   cpu: 168%/70%   2         10        5          144m
+saas-matrix-hpa   Deployment/saas-matrix   cpu: 168%/70%   2         10        8          144m
+
+matrix size 250 vu 5
+saas-matrix-hpa   Deployment/saas-matrix   cpu: 168%/70%   2         10        8          144m
+saas-matrix-hpa   Deployment/saas-matrix   cpu: 21%/70%    2         10        8          145m
+saas-matrix-hpa   Deployment/saas-matrix   cpu: 23%/70%    2         10        8          145m
+
+
+matrix size 250 vu 10
+saas-matrix-hpa   Deployment/saas-matrix   cpu: 23%/70%    2         10        8          145m
+saas-matrix-hpa   Deployment/saas-matrix   cpu: 56%/70%    2         10        8          146m
+saas-matrix-hpa   Deployment/saas-matrix   cpu: 58%/70%    2         10        8          146m
+
+NAME                          CPU(cores)   MEMORY(bytes)
+saas-matrix-8d957db96-4kvlq   428m         41Mi
+saas-matrix-8d957db96-6xq8q   496m         54Mi
+saas-matrix-8d957db96-hfzzr   62m          53Mi
+saas-matrix-8d957db96-k67h9   2m           34Mi
+saas-matrix-8d957db96-wx2xm   404m         43Mi
+saas-matrix-8d957db96-xrm72   654m         49Mi
+saas-matrix-8d957db96-z6dk6   2m           60Mi
+
+
+matrix size 250 vu 25
+saas-matrix-hpa   Deployment/saas-matrix   cpu: 106%/70%   2         10        8          147m
+saas-matrix-hpa   Deployment/saas-matrix   cpu: 106%/70%   2         10        10         147m
+
+matrix size 250 vu 50
+saas-matrix-hpa   Deployment/saas-matrix   cpu: 136%/70%   2         10        10         148m
+saas-matrix-hpa   Deployment/saas-matrix   cpu: 149%/70%   2         10        10         149m
+
+matrix size 250 vu 100
+saas-matrix-hpa   Deployment/saas-matrix   cpu: 149%/70%   2         10        10         149m
+saas-matrix-hpa   Deployment/saas-matrix   cpu: 149%/70%   2         10        10         150m
+
+matrix size 350 vu 1
+saas-matrix-hpa   Deployment/saas-matrix   cpu: 79%/70%    2         10        10         151m
+saas-matrix-hpa   Deployment/saas-matrix   cpu: 44%/70%    2         10        10         152m
+
+matrix size 350 vu 10
+saas-matrix-hpa   Deployment/saas-matrix   cpu: 86%/70%    2         10        10         153m
+
+matrix size 350 vu 25
+saas-matrix-hpa   Deployment/saas-matrix   cpu: 114%/70%   2         10        10         154m
+
+matrix size 350 vu 50
+saas-matrix-hpa   Deployment/saas-matrix   cpu: 114%/70%   2         10        10         154m
+saas-matrix-hpa   Deployment/saas-matrix   cpu: 147%/70%   2         10        10         155m
+
+saas-matrix-8d957db96-4kvlq   796m         123Mi
+saas-matrix-8d957db96-6xq8q   807m         105Mi
+saas-matrix-8d957db96-hfzzr   452m         178Mi
+saas-matrix-8d957db96-k67h9   574m         100Mi
+saas-matrix-8d957db96-wx2xm   587m         167Mi
+saas-matrix-8d957db96-xrm72   902m         96Mi
+saas-matrix-8d957db96-z6dk6   793m         196Mi
+
+saas-matrix-hpa   Deployment/saas-matrix   cpu: 140%/70%   2         10        10         156m
+
+K6 loading testing stopped due threshold limit
+
+saas-matrix-hpa   Deployment/saas-matrix   cpu: 61%/70%    2         10        10         157m
+saas-matrix-hpa   Deployment/saas-matrix   cpu: 0%/70%     2         10        10         158m
+
+Full (kubectl get hpa -w)
+saas-matrix-hpa   Deployment/saas-matrix   cpu: 0%/70%   2         10        2          108m
+saas-matrix-hpa   Deployment/saas-matrix   cpu: 0%/70%   2         10        2          115m
+saas-matrix-hpa   Deployment/saas-matrix   cpu: 0%/70%   2         10        2          116m
+saas-matrix-hpa   Deployment/saas-matrix   cpu: 0%/70%   2         10        2          121m
+saas-matrix-hpa   Deployment/saas-matrix   cpu: 1%/70%   2         10        2          122m
+saas-matrix-hpa   Deployment/saas-matrix   cpu: 2%/70%   2         10        2          123m
+saas-matrix-hpa   Deployment/saas-matrix   cpu: 3%/70%   2         10        2          124m
+saas-matrix-hpa   Deployment/saas-matrix   cpu: 7%/70%   2         10        2          125m
+saas-matrix-hpa   Deployment/saas-matrix   cpu: 6%/70%   2         10        2          126m
+saas-matrix-hpa   Deployment/saas-matrix   cpu: 0%/70%   2         10        2          127m
+saas-matrix-hpa   Deployment/saas-matrix   cpu: 1%/70%   2         10        2          128m
+saas-matrix-hpa   Deployment/saas-matrix   cpu: 3%/70%   2         10        2          129m
+saas-matrix-hpa   Deployment/saas-matrix   cpu: 3%/70%   2         10        2          129m
+saas-matrix-hpa   Deployment/saas-matrix   cpu: 3%/70%   2         10        2          129m
+saas-matrix-hpa   Deployment/saas-matrix   cpu: 6%/70%   2         10        2          130m
+saas-matrix-hpa   Deployment/saas-matrix   cpu: 6%/70%   2         10        2          130m
+saas-matrix-hpa   Deployment/saas-matrix   cpu: 11%/70%   2         10        2          131m
+saas-matrix-hpa   Deployment/saas-matrix   cpu: 14%/70%   2         10        2          132m
+saas-matrix-hpa   Deployment/saas-matrix   cpu: 1%/70%    2         10        2          133m
+saas-matrix-hpa   Deployment/saas-matrix   cpu: 5%/70%    2         10        2          134m
+saas-matrix-hpa   Deployment/saas-matrix   cpu: 10%/70%   2         10        2          135m
+saas-matrix-hpa   Deployment/saas-matrix   cpu: 23%/70%   2         10        2          136m
+saas-matrix-hpa   Deployment/saas-matrix   cpu: 40%/70%   2         10        2          137m
+saas-matrix-hpa   Deployment/saas-matrix   cpu: 65%/70%   2         10        2          138m
+saas-matrix-hpa   Deployment/saas-matrix   cpu: 7%/70%    2         10        2          139m
+saas-matrix-hpa   Deployment/saas-matrix   cpu: 26%/70%   2         10        2          140m
+saas-matrix-hpa   Deployment/saas-matrix   cpu: 53%/70%   2         10        2          141m
+saas-matrix-hpa   Deployment/saas-matrix   cpu: 105%/70%   2         10        2          142m
+saas-matrix-hpa   Deployment/saas-matrix   cpu: 105%/70%   2         10        3          142m
+saas-matrix-hpa   Deployment/saas-matrix   cpu: 162%/70%   2         10        3          143m
+saas-matrix-hpa   Deployment/saas-matrix   cpu: 162%/70%   2         10        5          143m
+saas-matrix-hpa   Deployment/saas-matrix   cpu: 163%/70%   2         10        5          143m
+saas-matrix-hpa   Deployment/saas-matrix   cpu: 168%/70%   2         10        5          144m
+saas-matrix-hpa   Deployment/saas-matrix   cpu: 168%/70%   2         10        8          144m
+saas-matrix-hpa   Deployment/saas-matrix   cpu: 21%/70%    2         10        8          145m
+saas-matrix-hpa   Deployment/saas-matrix   cpu: 23%/70%    2         10        8          145m
+saas-matrix-hpa   Deployment/saas-matrix   cpu: 56%/70%    2         10        8          146m
+saas-matrix-hpa   Deployment/saas-matrix   cpu: 58%/70%    2         10        8          146m
+saas-matrix-hpa   Deployment/saas-matrix   cpu: 106%/70%   2         10        8          147m
+saas-matrix-hpa   Deployment/saas-matrix   cpu: 106%/70%   2         10        10         147m
+saas-matrix-hpa   Deployment/saas-matrix   cpu: 136%/70%   2         10        10         148m
+saas-matrix-hpa   Deployment/saas-matrix   cpu: 149%/70%   2         10        10         149m
+saas-matrix-hpa   Deployment/saas-matrix   cpu: 149%/70%   2         10        10         150m
+saas-matrix-hpa   Deployment/saas-matrix   cpu: 79%/70%    2         10        10         151m
+saas-matrix-hpa   Deployment/saas-matrix   cpu: 44%/70%    2         10        10         152m
+saas-matrix-hpa   Deployment/saas-matrix   cpu: 86%/70%    2         10        10         153m
+saas-matrix-hpa   Deployment/saas-matrix   cpu: 114%/70%   2         10        10         154m
+saas-matrix-hpa   Deployment/saas-matrix   cpu: 147%/70%   2         10        10         155m
+saas-matrix-hpa   Deployment/saas-matrix   cpu: 140%/70%   2         10        10         156m
+saas-matrix-hpa   Deployment/saas-matrix   cpu: 139%/70%   2         10        10         156m
+saas-matrix-hpa   Deployment/saas-matrix   cpu: 140%/70%   2         10        10         156m
+saas-matrix-hpa   Deployment/saas-matrix   cpu: 139%/70%   2         10        10         156m
+saas-matrix-hpa   Deployment/saas-matrix   cpu: 61%/70%    2         10        10         157m
+saas-matrix-hpa   Deployment/saas-matrix   cpu: 0%/70%     2         10        10         158m
+saas-matrix-hpa   Deployment/saas-matrix   cpu: 0%/70%   2         10        10         160m
+saas-matrix-hpa   Deployment/saas-matrix   cpu: 0%/70%   2         10        10         160m
+saas-matrix-hpa   Deployment/saas-matrix   cpu: 0%/70%   2         10        10         161m
+saas-matrix-hpa   Deployment/saas-matrix   cpu: 0%/70%   2         10        10         161m
+saas-matrix-hpa   Deployment/saas-matrix   cpu: 0%/70%   2         10        7          162m
+saas-matrix-hpa   Deployment/saas-matrix   cpu: 0%/70%   2         10        7          162m
+saas-matrix-hpa   Deployment/saas-matrix   cpu: 0%/70%   2         10        2          163m
