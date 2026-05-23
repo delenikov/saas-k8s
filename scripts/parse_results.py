@@ -53,8 +53,13 @@ for f in glob.glob('results/*.json'):
         'data_received_MB':
             round(metrics['data_received']['count'] / 1024 / 1024, 4),
 
-        'error_rate':
-            round(metrics['http_req_failed']['value'], 4),
+        'error_rate_percent':
+            round(metrics['http_req_failed']['value'] * 100, 2),
+
+        'p95_threshold_passed':
+            metrics['http_req_duration']
+                .get('thresholds', {})
+                .get('p(95)<60000', False),
     })
 
 rows.sort(
