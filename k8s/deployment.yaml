@@ -16,8 +16,8 @@ spec:
     spec:
       containers:
         - name: saas-matrix
-          image: 457090734537.dkr.ecr.eu-central-1.amazonaws.com/saas-matrix-project:latest
-          # image: saasprojectregistry.azurecr.io/saas-matrix-project:latest
+          #image: 457090734537.dkr.ecr.eu-central-1.amazonaws.com/saas-matrix-project:latest
+          image: saasprojectregistry.azurecr.io/saas-matrix-project:latest
           imagePullPolicy: Always
           ports:
             - containerPort: 8080

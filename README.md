@@ -4,8 +4,6 @@ FastAPI microservice for a deterministic matrix multiplication workload used in 
 
 ## Endpoints
 
-- `GET /health` returns service health.
-- `GET /metrics-info` returns hostname, process id, CPU count, and resident memory usage.
 - `POST /compute?size=64` runs the CPU workload.
 - The compute response includes `size`, `execution_time_seconds`, `checksum`, `timestamp`, `pod_hostname`, and `cpu_count`.
 
@@ -13,7 +11,7 @@ Validation rejects `size > 5000` with FastAPI validation errors.
 
 ## Workload Algorithm
 
-The service uses one algorithm: generate two deterministic `size x size` matrices, then repeatedly multiply them with an explicit triple-loop `O(n^3)` Python implementation. A checksum is accumulated from every multiplication result so the work cannot be optimized away.
+The service uses one algorithm: generate two deterministic `size x size` matrices, then repeatedly multiply them with an explicit triple-loop `O(n^3)` Python implementation. 
 
 ## Local Run
 
@@ -43,15 +41,14 @@ docker run --rm -p 8080:8080 saas-matrix-project:latest
 ## Example Requests
 
 ```bash
-curl http://localhost:8080/health
-curl http://localhost:8080/metrics-info
 curl -X POST "http://localhost:8080/compute?size=64"
 curl -X POST "http://localhost:8080/compute?size=128"
 ```
 
-## Kubernetes HPA Notes
 
-- Run one uvicorn process per container and scale replicas with HPA.
-- Set container CPU requests because CPU-based HPA calculates utilization from requested CPU.
-- Increase request concurrency using k6 to produce predictable pod CPU pressure.
-- Add Prometheus instrumentation later on a dedicated `/metrics` endpoint; `/metrics-info` is intentionally human-readable runtime info.
+## Load testing
+```bash
+./scripts/run_tests.sh a81c30a73ecb14b55b4216b98eb754fe-1000624712.eu-central-1.elb.amazonaws.com eks
+./scripts/run_tests.sh 134.112.128.79:80 aks
+python scripts/parse_results.py
+```
