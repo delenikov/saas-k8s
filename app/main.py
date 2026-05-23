@@ -30,16 +30,20 @@ def health() -> dict[str, str]:
 @app.post("/compute")
 def compute(
     size: int = Query(default=100, ge=1, le=5000),
-    iterations: int = Query(default=1, ge=1, le=100),
 ) -> dict[str, float | int | str]:
     request_start_time = time.perf_counter()
     request_id = str(uuid4())
 
     metrics = collect_runtime_metrics()
 
-    request = ComputeRequest(size=size,iterations=iterations,)
+    request = ComputeRequest(size=size)
 
-    logger.info("request_id=%s compute request size=%s iterations=%s hostname=%s", request_id, size, iterations, metrics.hostname)
+    logger.info(
+        "request_id=%s compute request size=%s hostname=%s",
+        request_id,
+        size,
+        metrics.hostname,
+    )
 
     try:
         result = run_cpu_workload(request)
@@ -54,12 +58,24 @@ def compute(
 
     total_request_duration = time.perf_counter() - request_start_time
 
-    logger.info(("request_id=%s compute completed " "size=%s iterations=%s " "compute_duration=%.6f " "total_duration=%.6f " "hostname=%s"), request_id, size, iterations, result.execution_time_seconds, total_request_duration, metrics.hostname)
+    logger.info(
+        (
+            "request_id=%s compute completed "
+            "size=%s "
+            "compute_duration=%.6f "
+            "total_duration=%.6f "
+            "hostname=%s"
+        ),
+        request_id,
+        size,
+        result.execution_time_seconds,
+        total_request_duration,
+        metrics.hostname,
+    )
 
     return {
         "request_id": request_id,
         "size": size,
-        "iterations": iterations,
         "checksum": result.checksum,
         "compute_time_seconds": result.execution_time_seconds,
         "total_request_time_seconds": total_request_duration,

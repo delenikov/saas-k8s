@@ -6,10 +6,10 @@ FastAPI microservice for a deterministic matrix multiplication workload used in 
 
 - `GET /health` returns service health.
 - `GET /metrics-info` returns hostname, process id, CPU count, and resident memory usage.
-- `POST /compute?size=64&iterations=5` runs the CPU workload.
-- The compute response includes `size`, `iterations`, `execution_time_seconds`, `checksum`, `timestamp`, `pod_hostname`, and `cpu_count`.
+- `POST /compute?size=64` runs the CPU workload.
+- The compute response includes `size`, `execution_time_seconds`, `checksum`, `timestamp`, `pod_hostname`, and `cpu_count`.
 
-Validation rejects `size > 5000` and `iterations > 100` with FastAPI validation errors.
+Validation rejects `size > 5000` with FastAPI validation errors.
 
 ## Workload Algorithm
 
@@ -45,8 +45,8 @@ docker run --rm -p 8080:8080 saas-matrix-project:latest
 ```bash
 curl http://localhost:8080/health
 curl http://localhost:8080/metrics-info
-curl -X POST "http://localhost:8080/compute?size=64&iterations=5"
-curl -X POST "http://localhost:8080/compute?size=128&iterations=20"
+curl -X POST "http://localhost:8080/compute?size=64"
+curl -X POST "http://localhost:8080/compute?size=128"
 ```
 
 ## Kubernetes HPA Notes

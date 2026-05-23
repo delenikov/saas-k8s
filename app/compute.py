@@ -12,7 +12,6 @@ Matrix = list[list[float]]
 @dataclass(frozen=True, slots=True)
 class ComputeRequest:
     size: int
-    iterations: int
 
 
 @dataclass(frozen=True, slots=True)
@@ -28,7 +27,10 @@ def run_cpu_workload(request: ComputeRequest) -> ComputeResult:
     matrix_b = _build_matrix(request.size, seed=7)
 
     try:
-        checksum = _matrix_multiplication_workload(matrix_a=matrix_a,matrix_b=matrix_b,iterations=request.iterations)
+        checksum = _matrix_multiplication_workload(
+            matrix_a=matrix_a,
+            matrix_b=matrix_b,
+        )
     except MemoryError:
         logger.exception("Memory error while running CPU workload")
         raise
@@ -57,28 +59,23 @@ def _build_matrix(size: int, seed: int) -> Matrix:
 def _matrix_multiplication_workload(
     matrix_a: Matrix,
     matrix_b: Matrix,
-    iterations: int,
 ) -> float:
     result = matrix_a
     checksum = 0.0
     size = len(matrix_a)
+    next_result: Matrix = [[0.0] * size for _ in range(size)]
 
-    for _ in range(iterations):
-        next_result: Matrix = [[0.0] * size for _ in range(size)]
+    for row_index in range(size):
+        result_row = result[row_index]
+        next_row = next_result[row_index]
 
-        for row_index in range(size):
-            result_row = result[row_index]
-            next_row = next_result[row_index]
+        for column_index in range(size):
+            total = 0.0
 
-            for column_index in range(size):
-                total = 0.0
+            for inner_index in range(size):
+                total += result_row[inner_index] * matrix_b[inner_index][column_index]
 
-                for inner_index in range(size):
-                    total += result_row[inner_index] * matrix_b[inner_index][column_index]
-
-                next_row[column_index] = total
-                checksum += total
-
-        result = next_result
+            next_row[column_index] = total
+            checksum += total
 
     return checksum
