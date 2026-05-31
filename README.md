@@ -1,6 +1,6 @@
 # CPU Workload Service
 
-FastAPI microservice for a deterministic matrix multiplication workload used in Kubernetes HPA scalability experiments.
+FastAPI backend for a deterministic matrix multiplication workload used in Kubernetes HPA scalability experiments.
 
 ## Endpoints
 
