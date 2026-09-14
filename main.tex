@@ -5,12 +5,13 @@
 \usepackage[T2A]{fontenc}
 \usepackage[macedonian]{babel}
 \usepackage{float}
-\usepackage{booktabs}
 \usepackage{placeins}
 \usepackage{amsmath}
 \usepackage{tikz}
+\usetikzlibrary{arrows.meta,fit,positioning}
 \usepackage{pgfplots}
 \usepackage{hyperref}
+\usepackage{todonotes}
 
 \pgfplotsset{compat=1.18}
 
@@ -50,18 +51,19 @@ Software-as-a-Service (SaaS) апликациите сè повеќе се по�
 
 Анализата се фокусира на мерење на време на одговор, пропусен опсег, искористеност на процесорска моќ, како и стабилност на системот при различно оптоварување и различен број на конкурентни корисници.
 
-Главните истражувачки прашања кои се адресираат во овој проект се:
+Главните истражувачки прашања што се разгледуваат во овој проект се:
 
-\begin{itemize}
-    \item Дали постои конзистентна разлика во латентноста и пропустната моќ помеѓу AWS EKS и Azure AKS при исти услови? 
-    \item Како се менуваат перформансите со зголемување на пресметковната комплексност и бројот на конкурентни корисници? 
-    \item Дали Kubernetes Horizontal Pod Autoscaling (HPA) може ефикасно да скалира при висока искористеност на процесорот?
-    \item Во кој момент почнува да се намалува перформансот  за избраната конфигурација на кластерот? 
+\begin{enumerate}
+    \item Колкава е разликата во латентноста и пропусната моќ помеѓу AWS EKS и Azure AKS при исти услови на извршување?
+    \item Како се менуваат перформансите на апликацијата со зголемување на пресметковната комплексност и бројот на конкурентни корисници?
+    \item Како Kubernetes Horizontal Pod Autoscaler (HPA) реагира на зголемена искористеност на процесорот и во која мера автоматското скалирање влијае врз перформансите на апликацијата?
+    \item При кое ниво на оптоварување започнува значително намалување на перформансите за избраната конфигурација на кластерот?
+\end{enumerate}
 
 
-\end{itemize}
-За потребите на истражувањето беше користен k6 load testing framework, преку кој беа извршени повеќе тест сценарија со постепено зголемување на оптоварувањето. Со анализа на резултатите се добива увид во однесувањето и ограничувањата на системот при зголемено оптоварување.
+За потребите на истражувањето беше користен k6, open-source framework за тестирање на перформанси и оптоварување, развиен со цел симулирање на реалистично корисничко однесување и анализа на однесувањето на системите под различни нивоа на оптоварување \cite{grafanaK6}. Тестовите во k6 се дефинираат преку JavaScript или TypeScript скрипти, при што оптоварувањето може да се контролира преку виртуелни корисници (Virtual Users – VUs), број на итерации и различни сценарија за постепено или константно генерирање сообраќај. Алатката автоматски собира метрики како време на одговор, број на HTTP барања и стапка на неуспешни барања, а поддржува и пресметување на статистички показатели како просечна вредност и перцентили, вклучувајќи p95 \cite{grafanaK6Metrics}.
 
+Во рамки на ова истражување беа дефинирани повеќе тест-сценарија со постепено зголемување на оптоварувањето и бројот на конкурентни корисници. Добиените метрики беа искористени за анализа на латентноста, пропусноста и стапката на грешки, со цел да се утврдат однесувањето и ограничувањата на системот при зголемено оптоварување.
 \section{Поврзани истражувања}
 
 Бројни истражувања ја проучуваат скалабилноста на управувани Kubernetes Cloud околини. Horizontal Pod Autoscaling (HPA) често се користи за динамички да се прилагоди бројот на реплики на апликацијата врз однос на процесорка или мемориска искористеност. 
@@ -70,12 +72,19 @@ Software-as-a-Service (SaaS) апликациите сè повеќе се по�
 
 Во споредба со наведеното истражување, овој проект се разликува во неколку аспекти. Меѓу главните разлики може да се издвои тоа што претходниот труд ја анализира скалабилноста на дистрибуирана микросервисна e-commerce апликација, додека овој проект се фокусира на перформансите и скалабилноста на CPU-интензивен сервис за множење на матрици. Дополнително, нивното истражување опфаќа три cloud провајдери, додека овој проект е фокусиран на споредба помеѓу AWS Elastic Kubernetes Service (EKS) и Azure Kubernetes Service (AKS). Во врска со инфраструктурата, во претходното истражување кластерите користат идентични хардверски конфигурации кај сите cloud провајдери, додека во овој проект се користат различни типови на worker јазли (general-purpose кај EKS и burstable кај AKS), што претставува ограничување при директната споредба на резултатите. Различен е и пристапот при load тестирањето, бидејќи претходното истражување користи Locust со од 100 до 1000 конкурентни корисници во интервали од 30 минути, додека тука се користи k6 framework со тест сценарија од 1 минута и различни комбинации од големина на матрици и број на конкурентни корисници. Со анализа на нивните разлики, може да се заклучи дека двете истражувања повеќе се надополнуваат отколку што можат директно да се споредуваат, бидејќи овој проект се фокусира на CPU-bound скалабилност при различни контролирани тест сценарија.
 
-Друг релевантен труд е \textit{A Performance Evaluation of Containers Running on Managed Kubernetes Services} \cite{ferreira2019}, кој ги анализира перформансите на контејнеризирани апликации поставени на управувани Kubernetes сервиси како EKS, AKS и GKE. Ова истражувањето ги анализира метриките како процесорска моќ, меморија, мрежни ресурси, во споредба со мануелно поставена Kubernetes инфраструктура.
+Друг релевантен труд е \textit{A Performance Evaluation of Containers Running on Managed Kubernetes Services} \cite{ferreira2019}, кој ги анализира перформансите на контејнеризирани апликации поставени на управувани Kubernetes сервиси како EKS, AKS и GKE. Во истражувањето се анализира однесувањето на процесорот, меморијата, дискот и мрежата, а како основа за споредба се користи рачно поставена Kubernetes инфраструктура.
 
 Наведеното истражување во својот фокус ги става однесувањето и искористеноста на системските ресурси, додека овој проект ги анализира перформансите на CPU-интензивна апликација преку анализа на латентност, пропусен опсег и autoscaling при реални тест сценарија. 
 
 Ова го прави нивниот труд добра основа за разбирање на Kubernetes инфраструктурните перформанси, за разлика од ова истражување кое придонесува со практична анализа на скалабилност и однесување на системот при високо оптоварување.
 
+Особено близок до нашиот експеримент е трудот на Casalicchio \cite{casalicchio2019}, во кој се испитува автоматското скалирање на процесорски интензивни контејнеризирани апликации. За создавање оптоварување се користи \texttt{stress-ng}, кој множи квадратни матрици со различни димензии и број на работници, а се анализираат искористеноста на процесорот, времето на одговор и бројот на активни pod-инстанци. Авторот покажува дека изборот меѓу релативни и апсолутни CPU-метрики може значително да влијае врз одлуките за скалирање и врз времето на одговор. За разлика од тој труд, нашето истражување не предлага изменет HPA-алгоритам, туку користи стандарден HPA, конфигуриран според релативната процесорска искористеност, и ги споредува латентноста, пропусната моќ и грешките на HTTP-сервис во две управувани Kubernetes околини.
+
+Nguyen и соработниците \cite{nguyen2020} подетално го испитуваат оперативното однесување на Kubernetes Horizontal Pod Autoscaler преку повеќе експерименти. Тие ја разгледуваат разликата помеѓу стандардните Kubernetes Resource Metrics, како процесорска и мемориска искористеност, и приспособливите метрики добиени преку Prometheus, како и нивното влијание врз одлуките и брзината на скалирање. Овој труд е значаен за толкување на можните доцнења на HPA при нагло зголемување на оптоварувањето. За разлика од нашето истражување, тој не споредува EKS и AKS и не користи множење матрици, туку е насочен кон самиот механизам на HPA и изборот на метрики за негово активирање.
+
+Уште подиректна врска со користените платформи има истражувањето на Sochat и соработниците \cite{sochat2025}, кое споредува HPC-апликации на AWS, Azure и Google Cloud, вклучувајќи ги EKS, AKS и GKE. Меѓу употребените тестови е и MT-GEMM за мерење на перформансите при множење матрици во GFLOPs, а скалабилноста се испитува на голем број CPU и GPU ресурси. Прикажаните резултати за MT-GEMM се однесуваат на GPU-конфигурациите, додека CPU-резултатите се изоставени бидејќи извршувањето било ограничено од комуникацијата меѓу јазлите. Сепак, нивната цел е евалуација на преносливоста, употребливоста и силното скалирање на пакет од HPC-апликации во големи дистрибуирани околини. Нашиот експеримент е со помал обем и се насочува кон однесувањето на една веб-апликација при конкурентни HTTP-барања и кратки k6 тест-сценарија. Поради тоа, нивните резултати даваат поширок HPC-контекст, но не се директно споредливи со измерената латентност од крај до крај во нашиот систем.
+
+Најдиректна споредба со предметот на нашиот труд дава истражувањето на Culligan и соработниците \cite{culligan2026}, во кое на апликациско ниво се споредуваат AWS EKS и Azure AKS со три претставителни .NET микросервиси: пресметковно интензивен, трансакциски и влезно-излезно интензивен сервис. Авторите применуваат контролирани и еквивалентни работни оптоварувања и ги анализираат времето на одговор, пропусната моќ и ефикасноста на инфраструктурата. Нивниот пристап е близок до нашиот поради директната споредба на EKS и AKS под апликациско оптоварување. Сепак, нашиот експеримент користи една Python веб-апликација со алгоритам за множење матрици, k6 сценарија со различни димензии и број конкурентни корисници, како и нееквивалентни класи на виртуелни машини. Поради тоа, резултатите се споредливи на концептуално ниво, но не претставуваат директна репликација на нивниот експеримент.
 
 \section{Методи}
 
@@ -83,15 +92,74 @@ Software-as-a-Service (SaaS) апликациите сè повеќе се по�
 
 Апликацијата што се користи за тестирање е мала серверска апликација со еден endpoint \texttt{POST /compute?size=\{S\}}. За секое барање се генерираат две детерминистички матрици и се извршува нивно множење со алгоритам со три вгнездени циклуси, што создава значително процесорско оптоварување.
 
- Комплексноста на алгоритамот е приближно:
+Комплексноста на алгоритамот е приближно: $O(n^3)$, каде што $n$ ја претставува димензијата на матрицата.
 
-\[
-O(n^3)
-\]
+Апликацијата е имплементирана во програмскиот јазик Python 3.11 со веб-рамката FastAPI, а HTTP-сервисот се извршува преку Uvicorn на порта \texttt{8080}. Пресметковниот дел користи стандардни Python листи и алгоритам со три вгнездени циклуси, без NumPy или друга оптимизирана библиотека за матрични операции. На овој начин секое барање создава предвидливо и претежно процесорско оптоварување. По завршувањето, endpoint-от враќа контролна сума од резултатот, времетраење на пресметката и целокупно време на обработка на барањето. Апликацијата е спакувана во Docker image заснован на \texttt{python:3.11-slim} и истата контејнерска верзија се поставува на двата Kubernetes кластери.
 
-каде што \(n\) ја претставува димензијата на матрицата.
+На Слика~\ref{fig:cluster-architecture} е прикажана архитектурата на експерименталната поставеност. За секој тест-случај, k6 го генерира истото оптоварување одделно кон јавната адреса на EKS и AKS кластерот. LoadBalancer сервисот ги препраќа барањата до FastAPI pod-инстанците, кои Kubernetes ги распределува на трите worker јазли. HPA ја следи релативната процесорска искористеност и го приспособува бројот на реплики во зададениот опсег.
 
-\subsection{Конфигурација на кластерите}
+\begin{figure}[H]
+\centering
+\resizebox{\textwidth}{!}{%
+\begin{tikzpicture}[
+    font=\small,
+    flow/.style={-{Stealth[length=2mm]}, thick},
+    scaling/.style={-{Stealth[length=2mm]}, thick, dashed},
+    generator/.style={draw, rounded corners, thick, fill=gray!12,
+        align=center, minimum width=5.2cm, minimum height=1.05cm},
+    service/.style={draw, rounded corners, thick, fill=blue!10,
+        align=center, minimum width=4.8cm, minimum height=0.9cm},
+    application/.style={draw, rounded corners, thick, fill=green!12,
+        align=center, text width=2.7cm, minimum height=1.25cm},
+    autoscaler/.style={draw, rounded corners, thick, fill=orange!16,
+        align=center, text width=1.9cm, minimum height=1.25cm},
+    workers/.style={draw, rounded corners, thick, fill=gray!10,
+        align=center, minimum width=4.8cm, minimum height=1.0cm},
+    cluster/.style={draw, very thick, rounded corners, inner sep=7pt}
+]
+
+\node[generator] (k6) at (0,0) {k6 генератор на оптоварување\\
+исти HTTP \texttt{POST /compute} сценарија};
+
+\node[service] (eksService) at (-4,-1.7)
+    {Service од тип \texttt{LoadBalancer}\\порт 80 $\rightarrow$ 8080};
+\node[application] (eksApp) at (-4.9,-3.15)
+    {FastAPI Deployment\\иста Docker image};
+\node[autoscaler] (eksHpa) at (-2.25,-3.15)
+    {HPA\\2--10 реплики\\CPU 70\%};
+\node[workers] (eksNodes) at (-4,-4.65)
+    {3 worker nodes\\\texttt{m7i-flex.large}};
+
+\node[service] (aksService) at (4,-1.7)
+    {Service од тип \texttt{LoadBalancer}\\порт 80 $\rightarrow$ 8080};
+\node[application] (aksApp) at (3.1,-3.15)
+    {FastAPI Deployment\\иста Docker image};
+\node[autoscaler] (aksHpa) at (5.75,-3.15)
+    {HPA\\2--10 реплики\\CPU 70\%};
+\node[workers] (aksNodes) at (4,-4.65)
+    {3 worker nodes\\\texttt{Standard\_B2s\_v2}};
+
+\draw[flow] (k6.south) -- ++(0,-0.45) -| (eksService.north);
+\draw[flow] (k6.south) -- ++(0,-0.45) -| (aksService.north);
+\draw[flow] (eksService.south) -- (eksApp.north);
+\draw[flow] (aksService.south) -- (aksApp.north);
+\draw[flow] (eksApp.south) -- (eksNodes.north);
+\draw[flow] (aksApp.south) -- (aksNodes.north);
+\draw[scaling] (eksHpa.west) -- (eksApp.east);
+\draw[scaling] (aksHpa.west) -- (aksApp.east);
+
+\node[cluster, fit=(eksService)(eksApp)(eksHpa)(eksNodes),
+    label={[font=\bfseries]above:AWS EKS кластер}] {};
+\node[cluster, fit=(aksService)(aksApp)(aksHpa)(aksNodes),
+    label={[font=\bfseries]above:Azure AKS кластер}] {};
+
+\end{tikzpicture}
+}
+\caption{Архитектура на имплементацијата и патека на тест-барањата. Испрекинатите стрелки го означуваат автоматското скалирање.}
+\label{fig:cluster-architecture}
+\end{figure}
+
+% \subsection{Конфигурација на кластерите}
 
 Двата кластери користат по 3 worker nodes:
 \begin{itemize}
@@ -101,7 +169,7 @@ O(n^3)
 
 Овие виртуелни машини не се еквивалентни, па затоа експериментот споредува перформанси на управувани Kubernetes платформи во реални услови. Kubernetes ресурсите се конфигурирани со \texttt{requests} од 500m CPU и 512Mi меморија, а \texttt{limits} се поставени на 1 CPU и 1Gi меморија. Horizontal Pod Autoscaler (HPA) е поставен со минимум 2 реплики, максимум 10 реплики и таргетирано процесорско оптоварување од 70\%, со цел автоматско скалирање на pod инстанците врз основа на CPU utilization.
 
-\subsection{Тест случаи}
+\subsection{Експерименти}
 
 Load testing експериментите беа извршени со користење на k6 framework и предефинирани сценарија што комбинираат:
 \begin{itemize}
@@ -111,132 +179,300 @@ Load testing експериментите беа извршени со кори�
 
 Вкупно се дефинирани 42 тест случаи (TC1--TC42), при што секој тест трае 1 минута, со threshold услов \texttt{p(95) < 60000 ms}.
 
+Поголемите матрици бараат повеќе време за обработка, бидејќи алгоритамот со три вгнездени циклуси има временска сложеност $O(n^3)$. Времетраењето од 1 минута се однесува на периодот во кој k6 го генерира оптоварувањето, а не на максималното време за обработка на едно барање. Еднаквиот временски интервал е избран за тест-сценаријата да бидат споредливи, а вкупното времетраење и трошокот на експериментот да останат практично изводливи. Сепак, кај поголемите матрици во овој интервал се завршуваат помалку барања и системот може да нема доволно време за целосно стабилизирање на автоматското скалирање. Поради тоа, фиксното времетраење од 1 минута претставува ограничување на експериментот, а идни тестирања со поголеми матрици треба да користат подолги или приспособливи временски интервали.
+
 \subsection{Метрики за евалуација}
 
-Во анализата се следат следните метрики:
+Во анализата се следат следните метрики, добиени од k6 \cite{grafanaK6Metrics}:
 \begin{itemize}
-    \item просечна латентност (avg latency)
-    \item p95 латентност
-    \item максимална латентност
-    \item број на барања во секунда (requests/sec)
-    \item вкупен број барања
-    \item стапка на грешки (error rate)
+    \item \textbf{Просечна латентност (avg latency)} е аритметичката средина на времето потребно за испраќање на барањето и примање на целиот HTTP-одговор. Пониска вредност означува побрз одговор на апликацијата.
+    \item \textbf{p95 латентност} е времето под кое завршиле 95\% од измерените барања, додека преостанатите 5\% траеле подолго. Оваа метрика го прикажува однесувањето на побавните барања и е посоодветна за откривање оптоварување од просечната вредност.
+    \item \textbf{Максимална латентност} е најдолгото забележано време на одговор во едно тест-сценарио и ги истакнува најлошите поединечни случаи.
+    \item \textbf{Број на барања во секунда (requests/sec)} ја претставува пропусната моќ, односно просечниот број HTTP-барања што системот ги обработува во една секунда. Повисока вредност означува поголем капацитет за обработка.
+    \item \textbf{Вкупен број барања} е бројот на сите HTTP-барања регистрирани во текот на тест-сценариото, вклучувајќи ги успешните и неуспешните барања.
+    \item \textbf{Стапка на грешки (error rate)} е процентот на HTTP-барања што не завршиле успешно, на пример поради неуспешен статус или истекување на дозволеното време за одговор. Пониска вредност означува поголема стабилност на системот.
 \end{itemize}
 
-Speedup метриката е дефинирана како:
+Забрзувањето на времето и забрзувањето на пропусната моќ се дефинирани како:
 \[
-\text{Speedup}_{EKS/AKS} = \frac{T_{AKS}}{T_{EKS}}
+S_T = \frac{T_{AKS}}{T_{EKS}},
+\qquad
+S_R = \frac{R_{EKS}}{R_{AKS}},
 \]
-каде што \(T\) го претставува просечното време на одговор.
+каде што \(T\) е просечното време на одговор, а \(R\) е просечниот број барања во секунда. Односите се поставени така што вредност поголема од 1 означува предност на EKS, вредност 1 означува еднакви перформанси, а вредност помала од 1 означува предност на AKS.
+
 
 \section{Резултати}
 
-Со изведување на експериментот, тест сценаријата успешно беа извршени до димензија на матрица со 350 x 350 елементи со оптоварување до 50 конкурентни корисници. Сценаријата со димензија од 350 x 350 елементи и 100 корисници беа прекинати поради надминување на p95 threshold условот, односно 95\% од барањата да завршат под 60 секунди. Поради тоа, сценаријата со димензија на матрица со 500 x 500 елементи не беа извршени. Добиените резултати се прикажани во следните табели и графици.
+Тест-сценаријата успешно беа извршени до димензија на матрица од 350 x 350 елементи со најмногу 50 конкурентни корисници. Извршувањето беше прекинато по TC35, бидејќи стапката на неуспешни HTTP-барања го надмина зададениот праг од 5\%: 21,11\% на AKS и 17,17\% на EKS. Во истиот тест p95 латентноста се доближи до, но не го надмина прагот од 60 секунди. Поради прекинот, TC36 и сценаријата со матрица од 500 x 500 елементи не беа извршени.
 
-\subsection{Табели}
-\begin{table}[H]
-\centering
-\caption{Просечна латентност според димензија на матрица}
-\begin{tabular}{rrrr}
-\toprule
-Size & AKS avg (ms) & EKS avg (ms) & EKS better (\%) \\
-\midrule
-10 & 45.30 & 44.15 & 2.55 \\
-25 & 47.30 & 45.81 & 3.15 \\
-50 & 57.16 & 52.25 & 8.60 \\
-100 & 329.64 & 169.60 & 48.55 \\
-250 & 7656.41 & 7455.72 & 2.62 \\
-350 & 12987.87 & 12397.19 & 4.55 \\
-\bottomrule
-\end{tabular}
+За компактен споредбен приказ, просечната латентност, пропусната моќ и бројот на барања се прикажани како аритметички средини од извршените нивоа на конкурентност за секоја димензија. Кај p95 латентноста, максималната латентност и стапката на грешки се прикажани највисоките вредности забележани меѓу соодветните тест-сценарија, за преоптоварувањето да не се прикрие со просек. За димензиите од 10 до 250 се вклучени сите шест нивоа на корисници, а за димензијата 350 се вклучени петте завршени нивоа, од 1 до 50 корисници.
 
-\end{table}
-\begin{table}[H]
-\centering
-\caption{Перформанси на матрица со димензии 350 x 350 елементи и 50 корисници}
-\begin{tabular}{lrrrr}
-\toprule
-Platform & Avg (ms) & p95 (ms) & Error rate (\%) & Req/s \\
-\midrule
-AKS & 34640.36 & 59955.42 & 21.11 & 1.00 \\
-EKS & 33072.33 & 59551.13 & 17.17 & 1.31 \\
-\bottomrule
-\end{tabular}
-\end{table}
-\FloatBarrier
 \subsection{Графички приказ}
+
 \begin{figure}[H]
+\centering
+\begin{minipage}{0.49\textwidth}
 \centering
 \begin{tikzpicture}
 \begin{axis}[
-    width=0.9\textwidth,
-    height=6cm,
-    xlabel={Големина (димензија) на матрица},
-    ylabel={Просечен одговор (ms)},
-    legend pos=north west,
-    ymajorgrids=true,
-    xmajorgrids=true
+    width=0.82\linewidth,
+    height=5.2cm,
+    title={Просечна латентност},
+    xlabel={Димензија},
+    ylabel={Време (ms, log)},
+    symbolic x coords={10,25,50,100,250,350},
+    xtick=data,
+    ymode=log,
+    ymin=40, ymax=30000,
+    ytick={100,1000,10000},
+    yticklabels={100,1 000,10 000},
+    grid=major,
+    tick label style={font=\scriptsize},
+    label style={font=\scriptsize},
+    title style={font=\footnotesize},
+    legend style={font=\tiny, at={(0.02,0.98)}, anchor=north west}
 ]
-\addplot+[mark=o, thick] coordinates {
-    (10,45.3) (25,47.3) (50,57.16) (100,329.64) (250,7656.41) (350,12987.87)
+\addplot+[blue, mark=o, thick] coordinates {
+    (10,45.30) (25,47.30) (50,57.16) (100,329.64) (250,7656.41) (350,12987.87)
 };
 \addlegendentry{AKS}
-\addplot+[mark=square, thick] coordinates {
-    (10,44.15) (25,45.81) (50,52.25) (100,169.6) (250,7455.72) (350,12397.19)
+\addplot+[red!75!black, mark=square*, thick] coordinates {
+    (10,44.15) (25,45.81) (50,52.25) (100,169.60) (250,7455.73) (350,12397.19)
 };
 \addlegendentry{EKS}
 \end{axis}
 \end{tikzpicture}
-\caption{Просечна латентност по големина (димензија) на матрица.}
-\end{figure}
-\begin{figure}[H]
+\end{minipage}\hfill
+\begin{minipage}{0.49\textwidth}
 \centering
 \begin{tikzpicture}
 \begin{axis}[
-    width=0.9\textwidth,
-    height=6cm,
-    xlabel={Големина (димензија) на матрица},
-    ylabel={Барања/сек},
-    legend pos=north east,
-    ymajorgrids=true,
-    xmajorgrids=true
+    width=0.82\linewidth,
+    height=5.2cm,
+    title={p95 латентност},
+    xlabel={Димензија},
+    ylabel={Време (ms, log)},
+    symbolic x coords={10,25,50,100,250,350},
+    xtick=data,
+    ymode=log,
+    ymin=40, ymax=70000,
+    ytick={100,1000,10000,60000},
+    yticklabels={100,1 000,10 000,60 000},
+    grid=major,
+    tick label style={font=\scriptsize},
+    label style={font=\scriptsize},
+    title style={font=\footnotesize},
+    legend style={font=\tiny, at={(0.02,0.98)}, anchor=north west}
 ]
-\addplot+[mark=o, thick] coordinates {
+\addplot+[blue, mark=o, thick] coordinates {
+    (10,56.90) (25,63.96) (50,153.72) (100,1794.97) (250,43592.19) (350,59955.42)
+};
+\addlegendentry{AKS}
+\addplot+[red!75!black, mark=square*, thick] coordinates {
+    (10,54.99) (25,81.62) (50,81.13) (100,1153.32) (250,42863.40) (350,59551.13)
+};
+\addlegendentry{EKS}
+\addplot+[black, dashed, no marks] coordinates {(10,60000) (350,60000)};
+\addlegendentry{Праг}
+\end{axis}
+\end{tikzpicture}
+\end{minipage}
+\caption{Временски метрики по димензија на матрицата, прикажани со логаритамска y-оска.}
+\label{fig:latency-metrics}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{minipage}{0.49\textwidth}
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+    width=0.82\linewidth,
+    height=5.2cm,
+    title={Максимална латентност},
+    xlabel={Димензија},
+    ylabel={Време (ms, log)},
+    symbolic x coords={10,25,50,100,250,350},
+    xtick=data,
+    ymode=log,
+    ymin=70, ymax=70000,
+    ytick={100,1000,10000,60000},
+    yticklabels={100,1 000,10 000,60 000},
+    grid=major,
+    tick label style={font=\scriptsize},
+    label style={font=\scriptsize},
+    title style={font=\footnotesize},
+    legend style={font=\tiny, at={(0.02,0.98)}, anchor=north west}
+]
+\addplot+[blue, mark=o, thick] coordinates {
+    (10,233.99) (25,169.36) (50,422.35) (100,3584.50) (250,59956.26) (350,59959.52)
+};
+\addlegendentry{AKS}
+\addplot+[red!75!black, mark=square*, thick] coordinates {
+    (10,127.53) (25,130.78) (50,369.75) (100,2246.53) (250,49622.67) (350,59907.05)
+};
+\addlegendentry{EKS}
+\end{axis}
+\end{tikzpicture}
+\end{minipage}\hfill
+\begin{minipage}{0.49\textwidth}
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+    width=0.82\linewidth,
+    height=5.2cm,
+    title={Стапка на грешки},
+    xlabel={Димензија},
+    ylabel={Грешки (\%)},
+    symbolic x coords={10,25,50,100,250,350},
+    xtick=data,
+    ymin=0, ymax=25,
+    grid=major,
+    tick label style={font=\scriptsize},
+    label style={font=\scriptsize},
+    title style={font=\footnotesize},
+    legend style={font=\tiny, at={(0.02,0.98)}, anchor=north west}
+]
+\addplot+[blue, mark=o, thick] coordinates {
+    (10,0) (25,0) (50,0) (100,0) (250,0.72) (350,21.11)
+};
+\addlegendentry{AKS}
+\addplot+[red!75!black, mark=square*, thick] coordinates {
+    (10,0) (25,0) (50,0) (100,0) (250,0) (350,17.17)
+};
+\addlegendentry{EKS}
+\addplot+[black, dashed, no marks] coordinates {(10,5) (350,5)};
+\addlegendentry{Праг 5\%}
+\end{axis}
+\end{tikzpicture}
+\end{minipage}
+\caption{Највисоки забележани вредности за максималната латентност и стапката на грешки.}
+\label{fig:tail-error-metrics}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{minipage}{0.49\textwidth}
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+    width=0.82\linewidth,
+    height=5.2cm,
+    title={Просечна пропусна моќ},
+    xlabel={Димензија},
+    ylabel={Барања/секунда},
+    symbolic x coords={10,25,50,100,250,350},
+    xtick=data,
+    ymin=0, ymax=35,
+    grid=major,
+    tick label style={font=\scriptsize},
+    label style={font=\scriptsize},
+    title style={font=\footnotesize},
+    legend style={font=\tiny, at={(0.02,0.02)}, anchor=south west}
+]
+\addplot+[blue, mark=o, thick] coordinates {
     (10,30.35) (25,30.24) (50,29.66) (100,19.69) (250,2.84) (350,0.94)
 };
 \addlegendentry{AKS}
-\addplot+[mark=square, thick] coordinates {
-    (10,30.37) (25,30.26) (50,29.83) (100,24.25) (250,2.93) (350,1.05)
+\addplot+[red!75!black, mark=square*, thick] coordinates {
+    (10,30.37) (25,30.26) (50,29.83) (100,24.24) (250,2.93) (350,1.05)
 };
 \addlegendentry{EKS}
 \end{axis}
 \end{tikzpicture}
-\caption{Просечна пропусносен опсег по големина (димензија) на матрица.}
-\end{figure}
-\begin{figure}[H]
+\end{minipage}\hfill
+\begin{minipage}{0.49\textwidth}
 \centering
 \begin{tikzpicture}
 \begin{axis}[
-    width=0.9\textwidth,
-    height=6cm,
-    xlabel={Големина (димензија) на матрица},
-    ylabel={Speedup AKS/EKS},
-    ymajorgrids=true,
-    xmajorgrids=true
+    width=0.82\linewidth,
+    height=5.2cm,
+    title={Просечен број барања},
+    xlabel={Димензија},
+    ylabel={Барања по сценарио},
+    symbolic x coords={10,25,50,100,250,350},
+    xtick=data,
+    ymin=0, ymax=2000,
+    scaled y ticks=false,
+    grid=major,
+    tick label style={font=\scriptsize},
+    label style={font=\scriptsize},
+    title style={font=\footnotesize},
+    legend style={font=\tiny, at={(0.02,0.02)}, anchor=south west}
 ]
-\addplot+[mark=triangle, thick] coordinates {
-    (10,1.026) (25,1.033) (50,1.094) (100,1.944) (250,1.027) (350,1.048)
+\addplot+[blue, mark=o, thick] coordinates {
+    (10,1846.33) (25,1844.50) (50,1806.50) (100,1208.83) (250,192.17) (350,69.20)
 };
-\addplot[dashed] coordinates {(10,1.0) (350,1.0)};
+\addlegendentry{AKS}
+\addplot+[red!75!black, mark=square*, thick] coordinates {
+    (10,1846.33) (25,1846.00) (50,1820.17) (100,1482.83) (250,197.67) (350,71.80)
+};
+\addlegendentry{EKS}
 \end{axis}
 \end{tikzpicture}
+\end{minipage}
+\caption{Просечна пропусна моќ и просечен вкупен број барања по тест-сценарио.}
+\label{fig:throughput-request-metrics}
+\end{figure}
 
-\caption{Speedup ($T_{AKS}/T_{EKS}$), 
-каде вредности поголеми од 1 укажуваат на подобри перформанси на EKS.}
+\begin{figure}[H]
+\centering
+\begin{minipage}{0.49\textwidth}
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+    width=0.82\linewidth,
+    height=5.2cm,
+    title={Забрзување на времето},
+    xlabel={Димензија},
+    ylabel={$S_T=T_{AKS}/T_{EKS}$},
+    symbolic x coords={10,25,50,100,250,350},
+    xtick=data,
+    ymin=0.8, ymax=2.1,
+    grid=major,
+    tick label style={font=\scriptsize},
+    label style={font=\scriptsize},
+    title style={font=\footnotesize}
+]
+\addplot+[blue!70!black, mark=triangle*, thick] coordinates {
+    (10,1.026) (25,1.033) (50,1.094) (100,1.944) (250,1.027) (350,1.048)
+};
+\addplot+[black, dashed, no marks] coordinates {(10,1) (350,1)};
+\end{axis}
+\end{tikzpicture}
+\end{minipage}\hfill
+\begin{minipage}{0.49\textwidth}
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+    width=0.82\linewidth,
+    height=5.2cm,
+    title={Забрзување на пропусноста},
+    xlabel={Димензија},
+    ylabel={$S_R=R_{EKS}/R_{AKS}$},
+    symbolic x coords={10,25,50,100,250,350},
+    xtick=data,
+    ymin=0.95, ymax=1.3,
+    grid=major,
+    tick label style={font=\scriptsize},
+    label style={font=\scriptsize},
+    title style={font=\footnotesize}
+]
+\addplot+[red!75!black, mark=diamond*, thick] coordinates {
+    (10,1.001) (25,1.001) (50,1.006) (100,1.231) (250,1.030) (350,1.116)
+};
+\addplot+[black, dashed, no marks] coordinates {(10,1) (350,1)};
+\end{axis}
+\end{tikzpicture}
+\end{minipage}
+\caption{Забрзување на времето и на пропусната моќ. Вредностите над референтната линија 1 означуваат предност на EKS.}
+\label{fig:speedup-metrics}
 \end{figure}
 \FloatBarrier
 
 \section{Дискусија}
+
 Резултатите јасно покажуваат дека со зголемување на големината на матрицата и бројот на конкурентни корисници, латентноста нагло расте, што е очекувано за алгоритам со комплексност $O(n^3)$.  
 
 Кај помали матрици со димензии од 10 x 10 до 50 x 50 елементи, двете платформи имаат слични перформанси, со некои мали разлики. Кај поголеми матрици, особено матрица со димензии од 100 x 100 елементи, EKS покажува значително пониска просечна латентност во споредба со AKS. Кај најголемите матрици, матрици со димензии од 250 x 250 и 350 x 350 елементи, двете платформи го достигнуваат максималниот капацитет при што се забележува опаѓање на пропусноста и раст на латентноста.
@@ -248,6 +484,14 @@ EKS & 33072.33 & 59551.13 & 17.17 & 1.31 \\
 Клучна забелешка е дека класите на виртуелни машини по дизајн се различни, односно general-purpose на EKS наспроти burstable на AKS. Ова може суштински да влијае врз процесорските перформанси, динамиката на ограничување на процесорот (throttling) и латентноста кај најбавните барања при високо оптоварување.
 
 Според наведеното, дел од забележаните разлики веројатно произлегуваат од класата на виртуелните машини, а не само од однесување на управуваниот Kubernetes control plane node.
+
+\subsection{Споредба со поврзаните истражувања}
+
+Добиените резултати се совпаѓаат со заклучоците на Ferreira и Sinnott \cite{ferreira2019} дека не постои универзално најдобар управуван Kubernetes сервис и дека исходот зависи од видот на оптоварувањето и од инфраструктурата. Нивните резултати покажуваат предност на EKS кај процесорски и мемориски интензивни оптоварувања, што е во согласност со пониската просечна латентност и повисоката пропусна моќ на EKS во потешките сценарија од нашиот експеримент. Истата насока е забележана и кај Culligan и соработниците \cite{culligan2026}, каде што EKS постигнува пониско време на одговор и повисока пропусна моќ од AKS кај повеќе видови микросервиси. Сепак, големината на разликата не може непосредно да се споредува, бидејќи во нашиот експеримент се користат различни класи на виртуелни машини, пократки тестови и една Python апликација.
+
+Однесувањето на HPA делумно се совпаѓа со наодите на Casalicchio \cite{casalicchio2019} и Nguyen и соработниците \cite{nguyen2020}. Тие покажуваат дека изборот на метрика, интервалот на нејзино собирање и начинот на пресметување на потребниот број реплики влијаат врз брзината на скалирање и квалитетот на услугата. Во нашиот случај, стандардниот HPA заснован на релативна процесорска искористеност го зголемуваше бројот на реплики, но при наглото процесорско заситување не успеа целосно да го спречи растот на латентноста и грешките. Ова го поддржува нивниот општ заклучок дека автоматското скалирање само по себе не гарантира задржување на времето на одговор под зададен праг. Сепак, бидејќи не беа тестирани апсолутни или приспособени метрики, нашите резултати не овозможуваат директна потврда на нивните споредби меѓу различни HPA-пристапи.
+
+Резултатите се согласуваат и со поширокиот заклучок на Pasupuleti \cite{multicloud2025} и Sochat и соработниците \cite{sochat2025} дека перформансите во cloud и multi-cloud околини зависат од комбинацијата на платформата, хардверот, видот на апликацијата и начинот на скалирање. Сепак, нивните експерименти користат микросервисни и HPC-оптоварувања, подолги тестови, повеќе cloud провајдери и различни показатели, па не е оправдана директна споредба на нумеричките резултати. Според тоа, заклучоците од нашиот експеримент главно се совпаѓаат со поврзаната литература на квалитативно ниво: разликите меѓу платформите стануваат повидливи при високо оптоварување, реактивното скалирање има ограничувања, а изборот на инфраструктура мора да се разгледува заедно со карактеристиките на конкретната апликација.
 
 \section{Заклучок}
 
@@ -272,6 +516,36 @@ M. K. Pasupuleti,
 A. Pereira Ferreira and R. Sinnott,
 \textit{A Performance Evaluation of Containers Running on Managed Kubernetes Services},
 In: \textit{2019 IEEE International Conference on Cloud Computing Technology and Science (CloudCom)}, pp. 199--208, 2019. DOI: \href{https://doi.org/10.1109/CloudCom.2019.00038}{10.1109/CloudCom.2019.00038}.
+
+\bibitem{casalicchio2019}
+E. Casalicchio,
+\textit{A Study on Performance Measures for Auto-scaling CPU-intensive Containerized Applications},
+\textit{Cluster Computing}, vol. 22, pp. 995--1006, 2019. DOI: \href{https://doi.org/10.1007/s10586-018-02890-1}{10.1007/s10586-018-02890-1}.
+
+\bibitem{sochat2025}
+V. V. Sochat, D. Milroy, A. Sarkar, A. Marathe and T. Patki,
+\textit{Usability Evaluation of Cloud for HPC Applications},
+In: \textit{Proceedings of the SC '25 Workshops of the International Conference for High Performance Computing, Networking, Storage and Analysis}, pp. 135--150, 2025. DOI: \href{https://doi.org/10.1145/3731599.3767353}{10.1145/3731599.3767353}.
+
+\bibitem{nguyen2020}
+T.-T. Nguyen, Y.-J. Yeom, T. Kim, D.-H. Park and S. Kim,
+\textit{Horizontal Pod Autoscaling in Kubernetes for Elastic Container Orchestration},
+\textit{Sensors}, vol. 20, no. 16, article 4621, 2020. DOI: \href{https://doi.org/10.3390/s20164621}{10.3390/s20164621}.
+
+\bibitem{culligan2026}
+P. Culligan, V. Ayala-Rivera and A. O. Portillo-Dominguez,
+\textit{Application-Level Performance Benchmarking of AWS EKS and Azure AKS for Microservice Workloads},
+In: \textit{2026 6th International Conference on Electrical, Computer and Energy Technologies (ICECET)}, 2026. DOI: \href{https://doi.org/10.1109/ICECET65726.2026.11633068}{10.1109/ICECET65726.2026.11633068}.
+
+\bibitem{grafanaK6}
+Grafana Labs,
+\textit{Grafana k6 Documentation},
+официјална онлајн документација. Достапно на: \href{https://grafana.com/docs/k6/latest/}{grafana.com/docs/k6/latest/}.
+
+\bibitem{grafanaK6Metrics}
+Grafana Labs,
+\textit{Built-in Metrics Reference},
+официјална онлајн документација. Достапно на: \href{https://grafana.com/docs/k6/latest/using-k6/metrics/reference/}{grafana.com/docs/k6/latest/using-k6/metrics/reference/}.
 \end{thebibliography}
 
 \end{document}
